@@ -1,6 +1,6 @@
-using CRUDAppBackend.DB;
 using DbLib.Models.EntityFramework;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using ReactCRUD.DB;
 
 namespace ReactCRUD.Controllers
@@ -9,62 +9,77 @@ namespace ReactCRUD.Controllers
     [Route("[controller]")]
     public class PersonController : ControllerBase
     {
-        private readonly ILogger<PersonController> _logger;
-        private readonly MyDbContext dbContext;
+        private readonly MyDbContext _dbContext;
 
-        public PersonController(ILogger<PersonController> logger,MyDbContext dbContext)
+        public PersonController(MyDbContext dbContext)
         {
-            _logger = logger;
-            this.dbContext = dbContext;
+            _dbContext = dbContext;
         }
 
         [HttpGet]
-        public JsonResult Get()
+        public async Task<IResult> Get()
         {
-            return new JsonResult(PersonsManager.GetAll(dbContext));
+            var people = await _dbContext.Person.ToListAsync();
+            return Results.Ok(people);
         }
 
         [HttpPost]
-        public IResult Create([FromBody] Person person)
+        public async Task<IResult> Create([FromBody] Person person)
         {
-            try
+            return await HandleErrorsInMethod(async () =>
             {
-                PersonsManager.Add(dbContext, person);
-                return Results.Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                return Results.StatusCode(500);
-            }
+                _dbContext.Person.Add(person);
+                await _dbContext.SaveChangesAsync();
+            });
         }
 
         [HttpDelete("{id}")]
-        public IResult Delete(int id)
+        public async Task<IResult> Delete(int id)
         {
-            try
+            return await HandleErrorsInMethod(async () =>
             {
-                var result = PersonsManager.Delete(dbContext, id);
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                return Results.StatusCode(500);
-            }
+                var person = await _dbContext.Person.FindAsync(id);
+
+                if (person == null)
+                {
+                    throw new InvalidOperationException("Person not found");
+                }
+
+                _dbContext.Person.Remove(person);
+                await _dbContext.SaveChangesAsync();
+            });
         }
 
         [HttpPut]
-        public IResult Put([FromBody] Person changedPerson)
+        public async Task<IResult> Put([FromBody] Person changedPerson)
+        {
+            return await HandleErrorsInMethod(async () =>
+            {
+                var person = await _dbContext.Person.FindAsync(changedPerson.Id);
+
+                if (person == null)
+                {
+                    throw new InvalidOperationException("Person not found");
+                }
+
+                person.FirstName = changedPerson.FirstName;
+                person.LastName = changedPerson.LastName;
+                person.Age = changedPerson.Age;
+                person.Description = changedPerson.Description;
+
+                await _dbContext.SaveChangesAsync();
+            });
+        }
+
+        private async Task<IResult> HandleErrorsInMethod(Func<Task> databaseOperation)
         {
             try
             {
-                var result = PersonsManager.ChangePerson(dbContext, changedPerson);
-                return result;
+                await databaseOperation();
+                return Results.Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex.Message);
                 return Results.StatusCode(500);
             }
         }

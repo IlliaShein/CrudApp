@@ -24,27 +24,8 @@ namespace CRUDAppBackend
             string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<MyDbContext>(options =>
                 options.UseSqlServer(connectionString));
-            builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
-
-            using (var scope = app.Services.CreateScope())
-            {
-                var serviceProvider = scope.ServiceProvider;
-                var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
-
-                try
-                {
-                    using var dbContext = serviceProvider.GetRequiredService<MyDbContext>();
-                    dbContext.Database.OpenConnection();
-                    dbContext.Database.CloseConnection();
-                    logger.LogInformation("Database connected");
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError("Database connection error: " + ex.Message);
-                }
-            }
 
             if (app.Environment.IsDevelopment())
             {
