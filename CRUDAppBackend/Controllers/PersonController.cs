@@ -1,6 +1,6 @@
+using CRUDAppBackend.DB;
 using DbLib.Models.EntityFramework;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ReactCRUD.DB;
 
 namespace ReactCRUD.Controllers
@@ -9,79 +9,39 @@ namespace ReactCRUD.Controllers
     [Route("[controller]")]
     public class PersonController : ControllerBase
     {
-        private readonly MyDbContext _dbContext;
+        PersonManager _personManager;
 
         public PersonController(MyDbContext dbContext)
         {
-            _dbContext = dbContext;
+            _personManager = new PersonManager(dbContext);
         }
 
         [HttpGet]
-        public async Task<IResult> Get()
+        public async Task<IActionResult> Get()
         {
-            var people = await _dbContext.Person.ToListAsync();
-            return Results.Ok(people);
+            var people = await _personManager.GetAllPersons();
+            return Ok(people);
         }
 
         [HttpPost]
-        public async Task<IResult> Create([FromBody] Person person)
+        public async Task<IActionResult> Create([FromBody] Person person)
         {
-            return await HandleErrorsInMethod(async () =>
-            {
-                _dbContext.Person.Add(person);
-                await _dbContext.SaveChangesAsync();
-            });
+            await _personManager.Create(person);
+            return Ok();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IResult> Delete(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            return await HandleErrorsInMethod(async () =>
-            {
-                var person = await _dbContext.Person.FindAsync(id);
-
-                if (person == null)
-                {
-                    throw new InvalidOperationException("Person not found");
-                }
-
-                _dbContext.Person.Remove(person);
-                await _dbContext.SaveChangesAsync();
-            });
+            await _personManager.Delete(id);
+            return Ok();
         }
 
         [HttpPut]
-        public async Task<IResult> Put([FromBody] Person changedPerson)
+        public async Task<IActionResult> Put([FromBody] Person changedPerson)
         {
-            return await HandleErrorsInMethod(async () =>
-            {
-                var person = await _dbContext.Person.FindAsync(changedPerson.Id);
-
-                if (person == null)
-                {
-                    throw new InvalidOperationException("Person not found");
-                }
-
-                person.FirstName = changedPerson.FirstName;
-                person.LastName = changedPerson.LastName;
-                person.Age = changedPerson.Age;
-                person.Description = changedPerson.Description;
-
-                await _dbContext.SaveChangesAsync();
-            });
-        }
-
-        private async Task<IResult> HandleErrorsInMethod(Func<Task> databaseOperation)
-        {
-            try
-            {
-                await databaseOperation();
-                return Results.Ok();
-            }
-            catch (Exception)
-            {
-                return Results.StatusCode(500);
-            }
+            await _personManager.ChangePerson(changedPerson);
+            return Ok();
         }
     }
 }

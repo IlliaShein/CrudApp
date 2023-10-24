@@ -25,7 +25,15 @@ namespace CRUDAppBackend
             builder.Services.AddDbContext<MyDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
+            builder.Services.AddScoped(provider =>
+            {
+                var next = provider.GetRequiredService<RequestDelegate>();
+                return new ErrorHandlingMiddleware(next);
+            });
+
             var app = builder.Build();
+
+            app.UseMiddleware<ErrorHandlingMiddleware>();
 
             if (app.Environment.IsDevelopment())
             {
