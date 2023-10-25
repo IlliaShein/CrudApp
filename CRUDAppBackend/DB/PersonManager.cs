@@ -27,27 +27,23 @@ namespace CRUDAppBackend.DB
 
         public async Task Delete(int id)
         {
-            var person = await _dbContext.Person.SingleOrDefaultAsync(p => p.Id == id);
-
-            if (person == null)
+            if (!(_dbContext.Person.Any(p => p.Id == id)))
             {
                 throw new InvalidOperationException($"Person with id \"{id}\" not found");
             }
 
-            _dbContext.Person.Where(p => p.Id == id).ExecuteDelete();
+            await _dbContext.Person.Where(p => p.Id == id).ExecuteDeleteAsync();
         }
 
         public async Task ChangePerson(Person changedPerson)
         {
-            var person = await _dbContext.Person.SingleOrDefaultAsync(p => p.Id == changedPerson.Id);
-
-            if (person == null)
+            if (!(_dbContext.Person.Any(p => p.Id == changedPerson.Id)))
             {
                 throw new InvalidOperationException($"Person with id \"{changedPerson.Id}\" not found");
             }
 
-            _dbContext.Person.Where(p => p.Id == changedPerson.Id)
-                .ExecuteUpdate(p => p
+            await _dbContext.Person.Where(p => p.Id == changedPerson.Id)
+                .ExecuteUpdateAsync(p => p
                 .SetProperty(p => p.FirstName, changedPerson.FirstName)
                 .SetProperty(p => p.LastName, changedPerson.LastName)
                 .SetProperty(p => p.Age, changedPerson.Age)
