@@ -1,23 +1,26 @@
-﻿public class ErrorHandlingMiddleware
+﻿namespace CRUDAppBackend.Middlewares
 {
-    private readonly RequestDelegate _next;
-
-    public ErrorHandlingMiddleware(RequestDelegate next)
+    public class ErrorHandlingMiddleware
     {
-        _next = next;
-    }
+        private readonly RequestDelegate _next;
 
-    public async Task InvokeAsync(HttpContext context)
-    {
-        try
+        public ErrorHandlingMiddleware(RequestDelegate next)
         {
-            await _next(context);
+            _next = next;
         }
-        catch (Exception ex)
+
+        public async Task InvokeAsync(HttpContext context)
         {
-            context.Response.StatusCode = 500;
-            context.Response.ContentType = "text/plain";            
-            await context.Response.WriteAsync($"Internal Server Error : {ex.Message}");
+            try
+            {
+                await _next(context);
+            }
+            catch (Exception ex)
+            {
+                context.Response.StatusCode = 500;
+                context.Response.ContentType = "text/plain";
+                await context.Response.WriteAsync($"Internal Server Error : {ex.Message}");
+            }
         }
     }
 }

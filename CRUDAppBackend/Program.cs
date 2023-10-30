@@ -1,5 +1,9 @@
+using CRUDAppBackend.Interfaces;
+using CRUDAppBackend.Managers;
+using CRUDAppBackend.Middlewares;
 using DbLib.Models.EntityFramework;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
 
 namespace CRUDAppBackend
 {
@@ -10,6 +14,7 @@ namespace CRUDAppBackend
             var builder = WebApplication.CreateBuilder(args);
 
             const string corsPolicyName = "Cors";
+
             builder.Services.AddControllers();
 
             builder.Services.AddEndpointsApiExplorer();
@@ -25,15 +30,13 @@ namespace CRUDAppBackend
             builder.Services.AddDbContext<MyDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            builder.Services.AddScoped(provider =>
-            {
-                var next = provider.GetRequiredService<RequestDelegate>();
-                return new ErrorHandlingMiddleware(next);
-            });
+            builder.Services.AddScoped<IPersonManager, PersonManager>();
+
+            builder.Services.AddAutoMapper(typeof(Program));
 
             var app = builder.Build();
 
-            app.UseMiddleware<ErrorHandlingMiddleware>();
+            app.UseErrorHandling();
 
             if (app.Environment.IsDevelopment())
             {

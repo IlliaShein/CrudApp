@@ -1,7 +1,6 @@
-using CRUDAppBackend.DB;
-using DbLib.Models.EntityFramework;
+using CRUDAppBackend.DTOs;
+using CRUDAppBackend.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using ReactCRUD.DB;
 
 namespace ReactCRUD.Controllers
 {
@@ -9,22 +8,22 @@ namespace ReactCRUD.Controllers
     [Route("[controller]")]
     public class PersonController : ControllerBase
     {
-        PersonManager _personManager;
+        IPersonManager _personManager;
 
-        public PersonController(MyDbContext dbContext)
+        public PersonController(IPersonManager personManager)
         {
-            _personManager = new PersonManager(dbContext);
+            _personManager = personManager;
         }
 
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var people = await _personManager.GetAllPersons();
+            var people = await _personManager.GetAll();
             return Ok(people);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Person person)
+        public async Task<IActionResult> Create([FromBody] PersonDTO person)
         {
             await _personManager.Create(person);
             return Ok();
@@ -38,7 +37,7 @@ namespace ReactCRUD.Controllers
         }
 
         [HttpPut]
-        public async Task<IActionResult> Put([FromBody] Person changedPerson)
+        public async Task<IActionResult> Put([FromBody] PersonDTO changedPerson)
         {
             await _personManager.ChangePerson(changedPerson);
             return Ok();
