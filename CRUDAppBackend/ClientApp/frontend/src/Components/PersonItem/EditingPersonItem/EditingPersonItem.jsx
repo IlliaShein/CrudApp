@@ -21,31 +21,32 @@ const schema = yup.object().shape({
 
 const EditingPersonItem = ({ Save, Cancel }) => {
   const { person } = useContext(PersonContext);
-  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
+  const { register, handleSubmit, formState: { errors }, reset } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      id: person.id,
+      firstName: person.firstName,
+      lastName: person.lastName,
+      age: person.age,
+      description: person.description,
+    },
   });
 
   const onSubmit = (data) => {
-    console.log(data);
     Save(data);
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="person">
-        <EditingPersonItemForm
-          save={Save}
-          schema={schema}
-          setValue={setValue}
-          errors={errors}
-          person={person}
-          register={register}
-        />
-        <EditingPersonItemButtons handleCancel={Cancel} />
+        <EditingPersonItemForm errors={errors} register={register} />
+        <EditingPersonItemButtons handleCancel={() => {
+          reset();
+          Cancel();
+        }} />
       </div>
     </form>
   );
-  
 };
 
 export default EditingPersonItem;
