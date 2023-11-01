@@ -1,9 +1,9 @@
 import React, { createContext } from "react";
 import PersonItem from "./PersonItem/PersonItem";
 
-const MyContext = createContext();
+const PersonContext = createContext();
 
-const PersonsList = function ({ persons, title, remove, edit }) {
+const PersonsList = function ({ persons, title }) {
 
     return (
         <div>
@@ -14,9 +14,9 @@ const PersonsList = function ({ persons, title, remove, edit }) {
 
             <div className="App">
                 {persons.map((person, index) => (
-                    <MyContext.Provider value={{ person, number: index + 1 }}>
-                        <PersonItem remove={remove} edit={edit} key={person.id} />
-                    </MyContext.Provider>
+                    <PersonContext.Provider value={{ person, number: index + 1 }}>
+                        <PersonItem key={person.id} />
+                    </PersonContext.Provider>
                 ))}
             </div>
 
@@ -24,4 +24,4 @@ const PersonsList = function ({ persons, title, remove, edit }) {
     )
 }
 
-export { PersonsList, MyContext };
+export { PersonsList, PersonContext };

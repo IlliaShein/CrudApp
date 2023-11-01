@@ -1,32 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext } from 'react';
 import './Styles/App.css';
-import AddPersonForm from './Components/AddPersonForm';
+import AddPersonForm from './Components/AddPersonForm/AddPersonForm';
 import { PersonsList } from "./Components/PersonsList";
 import * as Api from "./APIs/Api";
+
+const GetPersonsContext = createContext();
 
 function App() {
   const [persons, setPersons] = useState([]);
 
   const getPersons = async () => {
     const data = await Api.getPersons();
-    console.log(data);
     setPersons(data);
-  };
-
-  const removePerson = async (personId) => {
-    await Api.removePerson(personId);
-    await getPersons();
-  };
-
-  const createPerson = async (newPerson) => {
-    console.log(newPerson);
-    await Api.createPerson(newPerson);
-    await getPersons();
-  };
-
-  const savePersonEditing = async (person) => {
-    await Api.savePersonEditing(person);
-    await getPersons();
   };
 
   useEffect(() => {
@@ -35,16 +20,16 @@ function App() {
 
   return (
     <div>
-
-      <AddPersonForm create={createPerson} />
-
-      {persons.length !== 0 ? (
-        <PersonsList remove={removePerson} edit={savePersonEditing} persons={persons} title={"Persons"} />
-      ) : (
-        <h2 style={{ textAlign: 'center' }}>Persons not found</h2>
-      )}
+      <GetPersonsContext.Provider value={{ getPersons }}>
+        <AddPersonForm/>
+        {persons.length !== 0 ? (
+          <PersonsList persons={persons} title={"Persons"} />
+        ) : (
+          <h2 style={{ textAlign: 'center' }}>Persons not found</h2>
+        )}
+      </GetPersonsContext.Provider>
     </div>
   );
 }
 
-export default App;
+export { App, GetPersonsContext };

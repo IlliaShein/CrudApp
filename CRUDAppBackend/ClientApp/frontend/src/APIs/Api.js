@@ -5,42 +5,26 @@ const baseUrl = 'https://localhost:7265/Person';
 async function HandleErrors(func) {
   try {
     const response = await func();
-    return response;
+    return response.data;
   } catch (error) {
     throw error;
   }
 }
 
 async function getPersons() {
-  return await HandleErrors(async () => {
-    const response = await axios.get(baseUrl);
-    return response.data;
-  });
+  return await HandleErrors(() => axios.get(baseUrl));
 }
 
 async function createPerson(newPerson) {
-  return await HandleErrors(async () => {
-    const response = await axios.post(baseUrl, newPerson, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.data;
-  });
+  return await HandleErrors(() => axios.post(baseUrl, newPerson));
 }
 
 async function removePerson(personId) {
-  return await HandleErrors(async () => {
-    const response = await axios.delete(baseUrl + "/" + personId);
-    return response.data;
-  });
+  return await HandleErrors(() => axios.delete(baseUrl + "/" + personId));
 }
 
 async function savePersonEditing(person) {
-  return await HandleErrors(async () => {
-    const response = await axios.put(baseUrl, person);
-    return response.data;
-  });
+  return await HandleErrors(() => axios.put(baseUrl, person));
 }
 
 export { getPersons, createPerson, removePerson, savePersonEditing };

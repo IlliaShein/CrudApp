@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useContext } from 'react';
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
-import MyButton from "./UI/Button/MyButton";
-import '../Styles/MyInput.css';
+import MyButton from "../UI/Button/MyButton";
+import '../../Styles/MyInput.css';
+import * as Api from "../../APIs/Api";
+import { GetPersonsContext } from '../../App';
+import FormElement from './FormElement';
 
 const schema = yup.object().shape({
   firstName: yup.string().required("First Name is required"),
@@ -17,44 +20,47 @@ const schema = yup.object().shape({
   description: yup.string(),
 });
 
-const AddPersonForm = function ({ create }) {
+const AddPersonForm = function () {
   const { register, handleSubmit, reset, formState: { errors } } = useForm({
     resolver: yupResolver(schema),
   });
+  const { getPersons } = useContext(GetPersonsContext);
 
-  const onSubmit = (data) => {
-    create(data);
+  const onSubmit = async (newPersonData) => {
+    await Api.createPerson(newPersonData);
+    await getPersons();
     reset();
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <input className='myInput'
-        {...register("firstName")}
-        type="text"
+      <FormElement
+        name="firstName"
         placeholder="First Name"
+        register={register}
+        error={errors.firstName}
       />
-      {errors.firstName && <p className='error'>{errors.firstName.message}</p>}
-      <input className='myInput'
-        {...register("lastName")}
-        type="text"
+      <FormElement
+        name="lastName"
         placeholder="Last Name"
+        register={register}
+        error={errors.lastName}
       />
-      {errors.lastName && <p className='error'>{errors.lastName.message}</p>}
-      <input className='myInput'
-        {...register("age")}
-        type="text"
+      <FormElement
+        name="age"
         placeholder="Age"
+        register={register}
+        error={errors.age}
       />
-      {errors.age && <p className='error'>{errors.age.message}</p>}
-      <input className='myInput'
-        {...register("description")}
-        type="text"
+      <FormElement
+        name="description"
         placeholder="Description"
+        register={register}
+        error={errors.description}
       />
       <MyButton type="submit">Add Person</MyButton>
     </form>
-  );
+    );
 };
 
 export default AddPersonForm;

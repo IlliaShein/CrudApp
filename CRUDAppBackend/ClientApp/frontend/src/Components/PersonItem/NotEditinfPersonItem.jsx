@@ -1,10 +1,18 @@
 import React, { useContext } from 'react';
 import MyButton from '../UI/Button/MyButton';
-import { MyContext } from '../PersonsList';
+import { PersonContext } from '../PersonsList';
+import * as Api from "../../APIs/Api";
+import { GetPersonsContext } from '../../App';
 
 
-const NotEditingPersonItem = ({ onEdit, onRemove }) => {
-  const {person, number} = useContext(MyContext);
+const NotEditingPersonItem = ({ onEdit }) => {
+  const {person, number} = useContext(PersonContext);
+  const { getPersons } = useContext(GetPersonsContext);
+
+  const onRemove = async (id) => {
+    await Api.removePerson(id);
+    await getPersons();
+  };
 
   return (
     <div className="person">

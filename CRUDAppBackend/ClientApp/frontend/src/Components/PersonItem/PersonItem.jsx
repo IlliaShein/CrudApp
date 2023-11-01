@@ -1,21 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import EditingPersonItem from './EditingPersonItem/EditingPersonItem';
 import NotEditingPersonItem from './NotEditinfPersonItem';
+import * as Api from "../../APIs/Api";
+import { GetPersonsContext } from '../../App';
 
-const PersonItem = function (props) {
-  const { person } = props;
+const PersonItem = function () {
   const [editing, setEditing] = useState(false);
-
-  const save = (personData) => {
+  const { getPersons } = useContext(GetPersonsContext);
+  
+  const save = async (personData) => {
     setEditing(false);
-    props.edit(personData);
+    await Api.savePersonEditing(personData);
+    await getPersons();
   };
-
   
   if (editing) {
     return (
       <EditingPersonItem
-        person={person}
         Save={save}
         Cancel={() => setEditing(false)}
       />
@@ -24,9 +25,7 @@ const PersonItem = function (props) {
 
   return (
     <NotEditingPersonItem
-      number={props.number}
       onEdit={() => setEditing(true)}
-      onRemove={props.remove}
     />
   )
 }
