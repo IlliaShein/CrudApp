@@ -1,7 +1,17 @@
-import React from 'react';
+import { FC } from 'react';
 import EditingPersonItemSegment from './EditingPersonItemSegment';
 
-const EditingPersonItemForm = ({ register, errors }) => {
+interface EditingPersonItemFormProps {
+  register: any;
+  errors: {
+    firstName?: any;
+    lastName?: any;
+    age?: any;
+    description?: any;
+  };
+}
+
+const EditingPersonItemForm: FC<EditingPersonItemFormProps> = ({ register, errors }) => {
   return (
     <div style={{ flexDirection: 'column', alignItems: 'start' }}>
       <EditingPersonItemSegment label="First name" name="firstName" register={register} error={errors.firstName} />

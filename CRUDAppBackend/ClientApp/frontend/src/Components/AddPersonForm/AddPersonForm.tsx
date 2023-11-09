@@ -1,14 +1,17 @@
 import React, { useContext } from 'react';
-import { useForm } from "react-hook-form";
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from "yup";
-import MyButton from "../UI/Button/MyButton";
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from 'yup';
+import MyButton from '../UI/Button/MyButton';
 import '../../Styles/MyInput.css';
-import * as Api from "../../APIs/Api";
+import * as Api from '../../APIs/Api';
 import { GetPersonsContext } from '../../App';
 import FormElement from './FormElement';
+import { Person } from '../../Interfaces/Person';
+import { CreateContext } from '../../Context/ContextManager';
 
 const schema = yup.object().shape({
+  id: yup.number().default(0),
   firstName: yup.string().required("First Name is required"),
   lastName: yup.string().required("Last Name is required"),
   age: yup
@@ -20,15 +23,17 @@ const schema = yup.object().shape({
   description: yup.string(),
 });
 
-const AddPersonForm = function () {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+
+const AddPersonForm: React.FC = () => {
+  const { register, handleSubmit, reset, formState: { errors } } = useForm<Person>({
     resolver: yupResolver(schema),
   });
-  const { getPersons } = useContext(GetPersonsContext);
 
-  const onSubmit = async (newPersonData) => {
-    await Api.createPerson(newPersonData);
-    await getPersons();
+  const { GetPersons } = CreateContext(GetPersonsContext);
+
+  const onSubmit = async (newPersonData: Person) => {
+    await Api.CreatePerson(newPersonData);
+    await GetPersons();
     reset();
   };
 
@@ -60,7 +65,7 @@ const AddPersonForm = function () {
       />
       <MyButton type="submit">Add Person</MyButton>
     </form>
-    );
+  );
 };
 
 export default AddPersonForm;

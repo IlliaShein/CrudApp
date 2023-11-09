@@ -1,17 +1,22 @@
-import React, { useContext } from 'react';
+import { useContext, FC } from 'react';
 import MyButton from '../UI/Button/MyButton';
 import { PersonContext } from '../PersonsList';
-import * as Api from "../../APIs/Api";
+import * as Api from '../../APIs/Api';
 import { GetPersonsContext } from '../../App';
+import { CreateContext } from '../../Context/ContextManager';
 
+interface NotEditingPersonItemProps {
+  onEdit: () => void;
+}
 
-const NotEditingPersonItem = ({ onEdit }) => {
-  const {person, number} = useContext(PersonContext);
-  const { getPersons } = useContext(GetPersonsContext);
+const NotEditingPersonItem: FC<NotEditingPersonItemProps> = ({ onEdit }) => {
 
-  const onRemove = async (id) => {
-    await Api.removePerson(id);
-    await getPersons();
+  const { GetPersons } = CreateContext(GetPersonsContext);
+  const { person, number } = CreateContext(PersonContext);
+
+  const onRemove = async (id: number): Promise<void> => {
+    await Api.RemovePerson(id);
+    await GetPersons();
   };
 
   return (

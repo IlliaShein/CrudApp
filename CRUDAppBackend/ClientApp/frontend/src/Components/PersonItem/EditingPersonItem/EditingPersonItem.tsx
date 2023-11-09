@@ -1,10 +1,23 @@
-import React, { useContext } from 'react';
-import { useForm } from 'react-hook-form';
+import { useContext, FC } from 'react';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
 import EditingPersonItemForm from './EditingPersonItemForm/EditingPersonItemForm';
 import EditingPersonItemButtons from './EditingPersonItemButtons';
 import { PersonContext } from '../../PersonsList';
+
+interface EditingPersonItemProps {
+  Save: (data: FormValues) => void;
+  Cancel: () => void;
+}
+
+interface FormValues {
+  id: string;
+  firstName: string;
+  lastName: string;
+  age: number;
+  description?: string;
+}
 
 const schema = yup.object().shape({
   id: yup.string().required(),
@@ -19,12 +32,22 @@ const schema = yup.object().shape({
   description: yup.string(),
 });
 
-const EditingPersonItem = ({ Save, Cancel }) => {
-  const { person } = useContext(PersonContext);
-  const { register, handleSubmit, formState: { errors }, reset } = useForm({
+const EditingPersonItem: FC<EditingPersonItemProps> = ({ Save, Cancel }) => {
+  const context = useContext(PersonContext);
+  if (!context) {
+    throw new Error('Context not provided properly');
+  }
+  const { person } = context;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<FormValues>({
     resolver: yupResolver(schema),
     defaultValues: {
-      id: person.id,
+      id: person.id.toString(),
       firstName: person.firstName,
       lastName: person.lastName,
       age: person.age,
@@ -32,7 +55,7 @@ const EditingPersonItem = ({ Save, Cancel }) => {
     },
   });
 
-  const onSubmit = (data) => {
+  const onSubmit: SubmitHandler<FormValues> = (data) => {
     Save(data);
   };
 
@@ -40,10 +63,12 @@ const EditingPersonItem = ({ Save, Cancel }) => {
     <form onSubmit={handleSubmit(onSubmit)}>
       <div className="person">
         <EditingPersonItemForm errors={errors} register={register} />
-        <EditingPersonItemButtons handleCancel={() => {
-          reset();
-          Cancel();
-        }} />
+        <EditingPersonItemButtons
+          handleCancel={() => {
+            reset();
+            Cancel();
+          }}
+        />
       </div>
     </form>
   );
